@@ -41,6 +41,7 @@
 // 9. Replace the placeholder values below with your actual Firebase config
 // ─────────────────────────────────────────────────────────────────────────────
 
+
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
