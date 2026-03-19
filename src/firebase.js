@@ -46,13 +46,13 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCcQveD2-msyCUhzuucL8OFf4Lfr5GPQMg",
-  authDomain: "sudoku-web-api.firebaseapp.com",
-  projectId: "sudoku-web-api",
-  storageBucket: "sudoku-web-api.firebasestorage.app",
-  messagingSenderId: "218687458362",
-  appId: "1:218687458362:web:e9f81948902ec1767db903",
-  measurementId: "G-1WH320MBCG"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
