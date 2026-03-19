@@ -57,6 +57,12 @@ export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
     generateNewPuzzle();
   }, []);
 
+  // Prevent page scroll while playing (arrow keys would otherwise scroll)
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   // Timer
   useEffect(() => {
     if (running && !won && !paused) {
@@ -243,7 +249,7 @@ export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', background: C.bgGrad, fontFamily: ff, padding: '12px 12px 24px', position: 'relative' }}>
+    <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', background: C.bgGrad, fontFamily: ff, padding: '12px 12px 24px', position: 'relative' }}>
       <ConfettiCanvas active={showConfetti} />
 
       {/* Header */}
