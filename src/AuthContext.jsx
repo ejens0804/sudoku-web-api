@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from './firebase.js';
 import {
   onAuthStateChanged,
@@ -109,6 +109,27 @@ export function AuthProvider({ children }) {
       });
     } catch (err) {
       console.error('Failed to update global stats:', err);
+    }
+  };
+
+  // Admin: wipe all leaderboard data for every user
+  const clearAllGlobalStats = async () => {
+    if (!user) return;
+    try {
+      await setDoc(doc(db, 'globalStats', 'leaderboards'), {
+        easy: [], medium: [], hard: [], daily: [],
+      });
+      await setDoc(doc(db, 'globalStats', 'activity'), { users: {} });
+      await setDoc(doc(db, 'globalStats', 'summary'), {
+        totalGames: 0,
+        easyCount: 0, easyTotalTime: 0,
+        mediumCount: 0, mediumTotalTime: 0,
+        hardCount: 0, hardTotalTime: 0,
+        dailyCount: 0, dailyTotalTime: 0,
+      }, { merge: true }); // merge keeps totalUsers intact
+    } catch (err) {
+      console.error('Failed to clear all global stats:', err);
+      throw err;
     }
   };
 
@@ -227,6 +248,7 @@ export function AuthProvider({ children }) {
     saveStats,
     updateGlobalStats,
     clearUserGlobalStats,
+    clearAllGlobalStats,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

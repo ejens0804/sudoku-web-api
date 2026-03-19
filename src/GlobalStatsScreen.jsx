@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { db } from './firebase.js';
 import { doc, getDoc, collection, getCountFromServer } from 'firebase/firestore';
 import { useTheme, ff, mf } from './ThemeContext.jsx';
+import { useAuth } from './AuthContext.jsx';
+
+const ADMIN_UID = '1wRNdr539GUE2rTeFA6bnLBcpTU2';
 
 const DIFFICULTIES = [
   { key: 'easy',   label: 'Easy',   color: '#50fa7b' },
@@ -15,6 +18,10 @@ const fmt = (s) =>
 
 export default function GlobalStatsScreen({ onBack }) {
   const { C } = useTheme();
+  const { user, clearAllGlobalStats } = useAuth();
+  const isAdmin = user?.uid === ADMIN_UID;
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [summary, setSummary] = useState(null);
   const [leaderboards, setLeaderboards] = useState(null);
   const [activity, setActivity] = useState(null);
@@ -198,6 +205,54 @@ export default function GlobalStatsScreen({ onBack }) {
             </div>
           )}
         </div>
+
+        {/* Admin: reset leaderboard */}
+        {isAdmin && (
+          <div style={{ background: C.surface, border: `1px solid ${C.error}40`, borderRadius: 14, padding: '16px 20px' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: C.error, marginBottom: 4, fontFamily: ff }}>Admin — Reset Leaderboard</div>
+            <div style={{ fontSize: 12, color: C.textDim, marginBottom: 12, fontFamily: ff }}>
+              Clears all leaderboard entries, activity, and game counters for every user. Cannot be undone.
+            </div>
+            {!confirmReset ? (
+              <button
+                onClick={() => setConfirmReset(true)}
+                style={{ padding: '10px 18px', border: `1px solid ${C.error}`, borderRadius: 10, background: 'none', color: C.error, fontFamily: ff, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+              >
+                Reset All Leaderboard Data
+              </button>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: C.error, fontFamily: ff }}>Are you sure? This wipes data for all users.</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    disabled={resetting}
+                    onClick={async () => {
+                      setResetting(true);
+                      try {
+                        await clearAllGlobalStats();
+                        setSummary(null);
+                        setLeaderboards({});
+                        setActivity({});
+                      } finally {
+                        setResetting(false);
+                        setConfirmReset(false);
+                      }
+                    }}
+                    style={{ padding: '10px 18px', border: 'none', borderRadius: 10, background: C.error, color: '#fff', fontFamily: ff, fontSize: 13, fontWeight: 600, cursor: resetting ? 'default' : 'pointer', opacity: resetting ? 0.6 : 1 }}
+                  >
+                    {resetting ? 'Resetting…' : 'Yes, reset everything'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmReset(false)}
+                    style={{ padding: '10px 18px', border: `1px solid ${C.border}`, borderRadius: 10, background: 'none', color: C.textDim, fontFamily: ff, fontSize: 13, cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
