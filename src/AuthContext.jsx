@@ -158,6 +158,7 @@ export function AuthProvider({ children }) {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (err) {
+      console.error('Google login error code:', err.code, err.message);
       setAuthError(friendlyError(err.code));
       throw err;
     }
