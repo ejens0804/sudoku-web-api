@@ -511,6 +511,11 @@ export default function GameScreen({ difficulty: initDiff, isDaily, forceSeed, o
   const tensionActive = timer > tensionThreshold && running && !won && !paused && !gameOver;
   const starCount = hintsUsed === 0 ? 3 : hintsUsed <= 2 ? 2 : 1;
 
+  // Highlight style derived values
+  const hl = settings.highlightStyle ?? 'full';
+  const accentRgb = hexToRgb(C.accent);
+  const isDark = theme === 'dark';
+
   // ─── Loading ──────────────────────────────────────────────────────────────
 
   if (!board || !given || !candidates) {
@@ -726,11 +731,20 @@ export default function GameScreen({ difficulty: initDiff, isDaily, forceSeed, o
               const isP    = isPeer(r, c);
               const inFlash = isInFlashGroup(r, c);
 
+              // Compute cell background based on highlight style
               let bg = 'transparent';
-              if (isHint)    bg = C.hintCell;
-              else if (isSel)  bg = C.selectedCell;
-              else if (isSame) bg = C.sameNumber;
-              else if (isP)    bg = C.peerHighlight;
+              if (isHint) {
+                bg = C.hintCell;
+              } else if (isSel) {
+                bg = C.selectedCell;
+              } else if (hl === 'full' || hl === 'standard') {
+                if (isSame) bg = C.sameNumber;
+                else if (isP) bg = C.peerHighlight;
+              } else if (hl === 'subtle') {
+                if (isSame) bg = `rgba(${accentRgb},${isDark ? 0.06 : 0.05})`;
+                else if (isP) bg = `rgba(${accentRgb},${isDark ? 0.02 : 0.015})`;
+              }
+              // hl === 'minimal': only selected (already handled above), no peers/same
 
               const bR = c === 2 || c === 5 ? `2px solid ${C.borderStrong}` : c === 8 ? 'none' : `1px solid ${C.border}`;
               const bB = r === 2 || r === 5 ? `2px solid ${C.borderStrong}` : r === 8 ? 'none' : `1px solid ${C.border}`;
@@ -746,13 +760,13 @@ export default function GameScreen({ difficulty: initDiff, isDaily, forceSeed, o
                     cursor: paused || gameOver ? 'default' : 'pointer', overflow: 'hidden',
                   }}
                 >
-                  {/* Group-complete flash overlay */}
-                  {inFlash && (
+                  {/* Group-complete flash overlay — only in Vivid mode */}
+                  {hl === 'full' && inFlash && (
                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(107,219,138,0.45)', animation: 'flashFade 0.9s ease-out forwards', pointerEvents: 'none', zIndex: 1 }} />
                   )}
-                  {/* Same-number flash overlay */}
-                  {flashNum && v === flashNum && v !== 0 && !isSel && (
-                    <div style={{ position: 'absolute', inset: 0, background: `rgba(${hexToRgb(C.accent)},0.28)`, animation: 'flashFade 0.4s ease-out forwards', pointerEvents: 'none', zIndex: 1 }} />
+                  {/* Same-number flash overlay — only in Vivid mode */}
+                  {hl === 'full' && flashNum && v === flashNum && v !== 0 && !isSel && (
+                    <div style={{ position: 'absolute', inset: 0, background: `rgba(${accentRgb},0.28)`, animation: 'flashFade 0.4s ease-out forwards', pointerEvents: 'none', zIndex: 1 }} />
                   )}
 
                   {paused ? null : v !== 0 ? (

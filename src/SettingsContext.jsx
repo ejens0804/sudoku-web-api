@@ -12,6 +12,7 @@ export const ACCENT_PALETTES = {
 
 const DEFAULTS = {
   accentColor: 'blue',
+  highlightStyle: 'full',   // 'full' | 'standard' | 'subtle' | 'minimal'
   autoAdvance: false,
   mistakeLimitMode: false,
   soundEnabled: false,

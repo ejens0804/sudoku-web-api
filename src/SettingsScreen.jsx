@@ -87,6 +87,117 @@ export default function SettingsScreen({ onBack }) {
           </div>
         </div>
 
+        {/* Grid Highlighting */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim, letterSpacing: '0.08em', padding: '0 4px' }}>GRID HIGHLIGHTING</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {[
+              {
+                key: 'full',
+                label: 'Vivid',
+                desc: 'Full color + flash animations',
+                preview: [
+                  { bg: C.accent + '38' },
+                  { bg: C.accent + '60' },
+                  { bg: C.accent + '22' },
+                  { bg: C.accent + '60' },
+                  { bg: C.accent + 'cc', text: true },
+                  { bg: C.accent + '60' },
+                  { bg: C.accent + '22' },
+                  { bg: C.accent + '60' },
+                  { bg: C.accent + '38' },
+                ],
+              },
+              {
+                key: 'standard',
+                label: 'Standard',
+                desc: 'Full color, no flash',
+                preview: [
+                  { bg: C.accent + '22' },
+                  { bg: C.accent + '44' },
+                  { bg: C.accent + '15' },
+                  { bg: C.accent + '44' },
+                  { bg: C.accent + 'cc', text: true },
+                  { bg: C.accent + '44' },
+                  { bg: C.accent + '15' },
+                  { bg: C.accent + '44' },
+                  { bg: C.accent + '22' },
+                ],
+              },
+              {
+                key: 'subtle',
+                label: 'Subtle',
+                desc: 'Dim colors, no flash',
+                preview: [
+                  { bg: C.accent + '0d' },
+                  { bg: C.accent + '18' },
+                  { bg: C.accent + '08' },
+                  { bg: C.accent + '18' },
+                  { bg: C.accent + '70', text: true },
+                  { bg: C.accent + '18' },
+                  { bg: C.accent + '08' },
+                  { bg: C.accent + '18' },
+                  { bg: C.accent + '0d' },
+                ],
+              },
+              {
+                key: 'minimal',
+                label: 'Minimal',
+                desc: 'Selected cell only',
+                preview: [
+                  { bg: 'transparent' },
+                  { bg: 'transparent' },
+                  { bg: 'transparent' },
+                  { bg: 'transparent' },
+                  { bg: C.accent + 'cc', text: true },
+                  { bg: 'transparent' },
+                  { bg: 'transparent' },
+                  { bg: 'transparent' },
+                  { bg: 'transparent' },
+                ],
+              },
+            ].map(({ key, label, desc, preview }) => {
+              const isSelected = settings.highlightStyle === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => updateSetting('highlightStyle', key)}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10,
+                    padding: '12px 14px', borderRadius: 12, cursor: 'pointer', textAlign: 'left',
+                    border: `1px solid ${isSelected ? C.accent : C.border}`,
+                    background: isSelected ? C.accentSoft : C.surface,
+                    boxShadow: isSelected ? `0 0 0 1px ${C.accent}` : 'none',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {/* Mini grid preview */}
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: 2, width: 48, height: 48, borderRadius: 6,
+                    overflow: 'hidden', border: `1px solid ${C.border}`,
+                  }}>
+                    {preview.map((cell, i) => (
+                      <div key={i} style={{
+                        background: cell.bg,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {cell.text && (
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', opacity: 0.9 }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: isSelected ? C.accent : C.text, fontFamily: ff }}>{label}</div>
+                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 2, fontFamily: ff, lineHeight: 1.4 }}>{desc}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Gameplay Toggles */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim, letterSpacing: '0.08em', padding: '0 4px' }}>GAMEPLAY</div>
