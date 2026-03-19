@@ -9,7 +9,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, runTransaction, increment } from 'firebase/firestore';
 
 const AuthContext = createContext(null);
 
@@ -46,6 +46,10 @@ export function AuthProvider({ children }) {
               displayName: firebaseUser.displayName || firebaseUser.email,
               createdAt: new Date().toISOString(),
             });
+            // Increment global total users count
+            try {
+              await setDoc(doc(db, 'globalStats', 'summary'), { totalUsers: increment(1) }, { merge: true });
+            } catch (_) {}
             setStats(fresh);
           }
         } catch (err) {
@@ -60,6 +64,53 @@ export function AuthProvider({ children }) {
     });
     return () => unsub();
   }, []);
+
+  // Update global stats when a game is completed
+  const updateGlobalStats = async (difficulty, time, hints) => {
+    if (!user) return;
+    const displayName = user.displayName || user.email?.split('@')[0] || 'Player';
+    try {
+      // 1. Increment summary counts atomically using flat field names
+      const summaryRef = doc(db, 'globalStats', 'summary');
+      await setDoc(summaryRef, {
+        totalGames: increment(1),
+        [`${difficulty}Count`]: increment(1),
+        [`${difficulty}TotalTime`]: increment(time),
+      }, { merge: true });
+
+      // 2. Update leaderboard — one entry per user (personal best), top 10
+      const lbRef = doc(db, 'globalStats', 'leaderboards');
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(lbRef);
+        const data = snap.exists() ? snap.data() : {};
+        const board = [...(data[difficulty] || [])];
+        const entry = { userId: user.uid, displayName, time, hints, date: new Date().toISOString() };
+        const idx = board.findIndex((e) => e.userId === user.uid);
+        if (idx !== -1) {
+          if (time < board[idx].time) board[idx] = entry;
+        } else {
+          board.push(entry);
+        }
+        board.sort((a, b) => a.time - b.time);
+        tx.set(lbRef, { [difficulty]: board.slice(0, 10) }, { merge: true });
+      });
+
+      // 3. Update per-user activity totals
+      const actRef = doc(db, 'globalStats', 'activity');
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(actRef);
+        const data = snap.exists() ? snap.data() : { users: {} };
+        const users = { ...(data.users || {}) };
+        users[user.uid] = {
+          displayName,
+          totalGames: ((users[user.uid]?.totalGames) || 0) + 1,
+        };
+        tx.set(actRef, { users }, { merge: true });
+      });
+    } catch (err) {
+      console.error('Failed to update global stats:', err);
+    }
+  };
 
   // Save stats to Firestore
   const saveStats = async (newStats) => {
@@ -127,6 +178,7 @@ export function AuthProvider({ children }) {
     loginWithGoogle,
     logout,
     saveStats,
+    updateGlobalStats,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -4,6 +4,7 @@ import { ThemeProvider } from './ThemeContext.jsx';
 import LoginScreen from './LoginScreen.jsx';
 import MenuScreen from './MenuScreen.jsx';
 import StatsScreen from './StatsScreen.jsx';
+import GlobalStatsScreen from './GlobalStatsScreen.jsx';
 import GameScreen from './GameScreen.jsx';
 
 function AppInner() {
@@ -37,6 +38,10 @@ function AppInner() {
     return <StatsScreen onBack={() => setScreen('menu')} />;
   }
 
+  if (screen === 'globalStats') {
+    return <GlobalStatsScreen onBack={() => setScreen('menu')} />;
+  }
+
   if (screen === 'game' && gameConfig) {
     return (
       <GameScreen
@@ -58,6 +63,7 @@ function AppInner() {
         setScreen('game');
       }}
       onStats={() => setScreen('stats')}
+      onGlobalStats={() => setScreen('globalStats')}
     />
   );
 }

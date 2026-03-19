@@ -18,13 +18,18 @@
 //    - Choose a region close to you (e.g., us-central1)
 //
 // 8. Set Firestore Security Rules (Firestore > Rules):
-//    
+//
 //    rules_version = '2';
 //    service cloud.firestore {
 //      match /databases/{database}/documents {
+//        // Each user can only read/write their own document
 //        match /users/{userId} {
 //          allow read, write: if request.auth != null
 //                             && request.auth.uid == userId;
+//        }
+//        // Global stats are readable and writable by any authenticated user
+//        match /globalStats/{document} {
+//          allow read, write: if request.auth != null;
 //        }
 //      }
 //    }

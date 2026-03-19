@@ -5,7 +5,7 @@ import { generatePuzzle, getDailySeed, getDailyDateString, isValidPlacement, com
 import ConfettiCanvas from './Confetti.jsx';
 
 export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
-  const { stats, saveStats } = useAuth();
+  const { stats, saveStats, updateGlobalStats } = useAuth();
   const { C, toggle, theme } = useTheme();
 
   const [difficulty] = useState(initDiff);
@@ -104,6 +104,7 @@ export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
     } else ns.streak = 1;
     ns.lastPlayDate = today;
     await saveStats(ns);
+    await updateGlobalStats(key, time, hintsUsed);
   };
 
   const checkWin = (b) => {
