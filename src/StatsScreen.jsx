@@ -12,7 +12,7 @@ function getMilestoneBadge(streak) {
 }
 
 export default function StatsScreen({ onBack }) {
-  const { stats, saveStats } = useAuth();
+  const { stats, saveStats, clearUserGlobalStats } = useAuth();
   const { C } = useTheme();
 
   const fmt = (s) =>
@@ -126,6 +126,7 @@ export default function StatsScreen({ onBack }) {
         })}
 
         <button onClick={async () => {
+          await clearUserGlobalStats();
           const empty = { easy: [], medium: [], hard: [], daily: [], streak: 0, lastPlayDate: null };
           await saveStats(empty);
         }} style={{

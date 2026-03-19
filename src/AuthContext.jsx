@@ -9,7 +9,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, runTransaction, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc, runTransaction, increment, deleteField } from 'firebase/firestore';
 
 const AuthContext = createContext(null);
 
@@ -112,6 +112,52 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Remove all global leaderboard / activity / summary contributions for this user
+  const clearUserGlobalStats = async () => {
+    if (!user) return;
+    try {
+      // 1. Remove user from every leaderboard difficulty
+      const lbRef = doc(db, 'globalStats', 'leaderboards');
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(lbRef);
+        if (!snap.exists()) return;
+        const data = snap.data();
+        const updates = {};
+        for (const key of ['easy', 'medium', 'hard', 'daily']) {
+          if (Array.isArray(data[key])) {
+            updates[key] = data[key].filter(e => e.userId !== user.uid);
+          }
+        }
+        if (Object.keys(updates).length) tx.set(lbRef, updates, { merge: true });
+      });
+
+      // 2. Remove user from the activity map
+      await setDoc(
+        doc(db, 'globalStats', 'activity'),
+        { users: { [user.uid]: deleteField() } },
+        { merge: true }
+      );
+
+      // 3. Subtract this user's games and times from the summary counters
+      const summaryUpdates = {};
+      let totalRemoved = 0;
+      for (const key of ['easy', 'medium', 'hard', 'daily']) {
+        const games = stats?.[key] || [];
+        if (games.length > 0) {
+          summaryUpdates[`${key}Count`] = increment(-games.length);
+          summaryUpdates[`${key}TotalTime`] = increment(-games.reduce((s, e) => s + e.time, 0));
+          totalRemoved += games.length;
+        }
+      }
+      if (totalRemoved > 0) {
+        summaryUpdates.totalGames = increment(-totalRemoved);
+        await setDoc(doc(db, 'globalStats', 'summary'), summaryUpdates, { merge: true });
+      }
+    } catch (err) {
+      console.error('Failed to clear global stats:', err);
+    }
+  };
+
   // Save stats to Firestore
   const saveStats = async (newStats) => {
     setStats(newStats);
@@ -180,6 +226,7 @@ export function AuthProvider({ children }) {
     logout,
     saveStats,
     updateGlobalStats,
+    clearUserGlobalStats,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
