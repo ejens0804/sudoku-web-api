@@ -28,7 +28,7 @@ export default function StatsScreen({ onBack }) {
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+      minHeight: '100dvh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
       background: C.bgGrad, fontFamily: ff, padding: '40px 20px',
     }}>
       <div style={{ width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 20 }}>

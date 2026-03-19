@@ -11,7 +11,7 @@ export default function MenuScreen({ onPlay, onDaily, onStats }) {
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: C.bgGrad, fontFamily: ff, padding: 20,
     }}>
       <div style={{ width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>

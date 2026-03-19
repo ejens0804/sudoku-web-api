@@ -242,14 +242,14 @@ export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
 
   if (!board || !given || !candidates) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bgGrad, fontFamily: ff }}>
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bgGrad, fontFamily: ff }}>
         <span style={{ color: C.textDim, fontSize: 14 }}>Generating puzzle...</span>
       </div>
     );
   }
 
   return (
-    <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', background: C.bgGrad, fontFamily: ff, padding: '12px 12px 24px', position: 'relative' }}>
+    <div style={{ height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', background: C.bgGrad, fontFamily: ff, padding: '12px 12px 24px', position: 'relative' }}>
       <ConfettiCanvas active={showConfetti} />
 
       {/* Header */}
