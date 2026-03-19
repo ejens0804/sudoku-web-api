@@ -378,6 +378,19 @@ export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
       <div style={{ width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
         {/* Action row */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
+          {/* New Puzzle (small) */}
+          <button onClick={isDaily ? onMenu : generateNewPuzzle} style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+            padding: '8px 10px', border: `1px solid ${C.border}`,
+            borderRadius: 10, background: C.surface,
+            color: C.textDim, cursor: 'pointer', transition: 'all 0.15s',
+            fontFamily: ff, position: 'relative',
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v4 M12 18v4 M4.93 4.93l2.83 2.83 M16.24 16.24l2.83 2.83 M2 12h4 M18 12h4 M4.93 19.07l2.83-2.83 M16.24 7.76l2.83-2.83"/>
+            </svg>
+            <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.02em' }}>New</span>
+          </button>
           {[
             { label: 'Undo', fn: undo, icon: 'M3 7v6h6 M21 17a9 9 0 00-9-9 9 9 0 00-6.69 3L3 13', on: false },
             { label: 'Erase', fn: handleErase, icon: 'M20 20H7L3 16l9-13 8 8-6 9z M13 7l4 4', on: false },
@@ -427,10 +440,6 @@ export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
           })}
         </div>
 
-        {/* New game */}
-        <button onClick={isDaily ? onMenu : generateNewPuzzle} style={{ padding: '12px', border: `1px solid ${C.border}`, borderRadius: 10, background: C.surfaceAlt, color: C.textDim, fontFamily: ff, fontSize: 13, fontWeight: 500, cursor: 'pointer', letterSpacing: '0.04em', marginTop: 4 }}>
-          New Puzzle
-        </button>
       </div>
     </div>
   );
