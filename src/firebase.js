@@ -22,10 +22,14 @@
 //    rules_version = '2';
 //    service cloud.firestore {
 //      match /databases/{database}/documents {
-//        // Each user can only read/write their own document
+//        // Users can only read/write their own document.
+//        // list (collection queries + count) is allowed for any authenticated
+//        // user so the global stats page can count total players without
+//        // exposing individual user data.
 //        match /users/{userId} {
-//          allow read, write: if request.auth != null
-//                             && request.auth.uid == userId;
+//          allow get, write: if request.auth != null
+//                            && request.auth.uid == userId;
+//          allow list: if request.auth != null;
 //        }
 //        // Global stats are readable and writable by any authenticated user
 //        match /globalStats/{document} {

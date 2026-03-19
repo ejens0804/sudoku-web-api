@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from './firebase.js';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getCountFromServer } from 'firebase/firestore';
 import { useTheme, ff, mf } from './ThemeContext.jsx';
 
 const DIFFICULTIES = [
@@ -24,12 +24,13 @@ export default function GlobalStatsScreen({ onBack }) {
   useEffect(() => {
     const load = async () => {
       try {
-        const [sumSnap, lbSnap, actSnap] = await Promise.all([
+        const [sumSnap, lbSnap, actSnap, usersCount] = await Promise.all([
           getDoc(doc(db, 'globalStats', 'summary')),
           getDoc(doc(db, 'globalStats', 'leaderboards')),
           getDoc(doc(db, 'globalStats', 'activity')),
+          getCountFromServer(collection(db, 'users')),
         ]);
-        setSummary(sumSnap.exists() ? sumSnap.data() : {});
+        setSummary({ ...(sumSnap.exists() ? sumSnap.data() : {}), totalUsers: usersCount.data().count });
         setLeaderboards(lbSnap.exists() ? lbSnap.data() : {});
         setActivity(actSnap.exists() ? actSnap.data() : {});
       } catch (err) {
