@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SettingsProvider } from './SettingsContext.jsx';
 import { AuthProvider, useAuth } from './AuthContext.jsx';
 import { ThemeProvider } from './ThemeContext.jsx';
 import LoginScreen from './LoginScreen.jsx';
@@ -6,6 +7,7 @@ import MenuScreen from './MenuScreen.jsx';
 import StatsScreen from './StatsScreen.jsx';
 import GlobalStatsScreen from './GlobalStatsScreen.jsx';
 import GameScreen from './GameScreen.jsx';
+import SettingsScreen from './SettingsScreen.jsx';
 
 function AppInner() {
   const { user, loading } = useAuth();
@@ -30,23 +32,18 @@ function AppInner() {
     );
   }
 
-  if (!user) {
-    return <LoginScreen />;
-  }
+  if (!user) return <LoginScreen />;
 
-  if (screen === 'stats') {
-    return <StatsScreen onBack={() => setScreen('menu')} />;
-  }
-
-  if (screen === 'globalStats') {
-    return <GlobalStatsScreen onBack={() => setScreen('menu')} />;
-  }
+  if (screen === 'stats') return <StatsScreen onBack={() => setScreen('menu')} />;
+  if (screen === 'globalStats') return <GlobalStatsScreen onBack={() => setScreen('menu')} />;
+  if (screen === 'settings') return <SettingsScreen onBack={() => setScreen('menu')} />;
 
   if (screen === 'game' && gameConfig) {
     return (
       <GameScreen
         difficulty={gameConfig.difficulty}
         isDaily={gameConfig.isDaily}
+        forceSeed={gameConfig.forceSeed ?? null}
         onMenu={() => { setGameConfig(null); setScreen('menu'); }}
       />
     );
@@ -54,26 +51,29 @@ function AppInner() {
 
   return (
     <MenuScreen
-      onPlay={(diff) => {
-        setGameConfig({ difficulty: diff, isDaily: false });
+      onPlay={(diff, forceSeed) => {
+        setGameConfig({ difficulty: diff, isDaily: false, forceSeed: forceSeed ?? null });
         setScreen('game');
       }}
       onDaily={() => {
-        setGameConfig({ difficulty: 'medium', isDaily: true });
+        setGameConfig({ difficulty: 'medium', isDaily: true, forceSeed: null });
         setScreen('game');
       }}
       onStats={() => setScreen('stats')}
       onGlobalStats={() => setScreen('globalStats')}
+      onSettings={() => setScreen('settings')}
     />
   );
 }
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppInner />
-      </AuthProvider>
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppInner />
+        </AuthProvider>
+      </ThemeProvider>
+    </SettingsProvider>
   );
 }

@@ -1,6 +1,16 @@
 import { useAuth } from './AuthContext.jsx';
 import { useTheme, ff, mf } from './ThemeContext.jsx';
 
+const MILESTONE_BADGES = [
+  { min: 100, emoji: '🏆', label: 'Centurion',  color: '#ffd700' },
+  { min: 30,  emoji: '🥇', label: 'Dedicated',  color: '#ffd700' },
+  { min: 7,   emoji: '🔥', label: 'On Fire',    color: '#ffb86c' },
+];
+
+function getMilestoneBadge(streak) {
+  return MILESTONE_BADGES.find(b => streak >= b.min) ?? null;
+}
+
 export default function StatsScreen({ onBack }) {
   const { stats, saveStats } = useAuth();
   const { C } = useTheme();
@@ -8,23 +18,23 @@ export default function StatsScreen({ onBack }) {
   const fmt = (s) =>
     s == null ? '--:--' : `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
-  const getBest = (k) => {
+  const getBest  = (k) => stats?.[k]?.length ? Math.min(...stats[k].map(e => e.time)) : null;
+  const getAvg   = (k) => {
     if (!stats?.[k]?.length) return null;
-    return Math.min(...stats[k].map((e) => e.time));
-  };
-  const getAvg = (k) => {
-    if (!stats?.[k]?.length) return null;
-    const t = stats[k].map((e) => e.time);
+    const t = stats[k].map(e => e.time);
     return Math.round(t.reduce((a, b) => a + b, 0) / t.length);
   };
   const getCount = (k) => stats?.[k]?.length || 0;
 
   const cats = [
-    { key: 'easy', label: 'Easy', color: C.success },
+    { key: 'easy',   label: 'Easy',   color: C.success },
     { key: 'medium', label: 'Medium', color: C.accent },
-    { key: 'hard', label: 'Hard', color: C.error },
-    { key: 'daily', label: 'Daily', color: '#ffb86c' },
+    { key: 'hard',   label: 'Hard',   color: C.error },
+    { key: 'daily',  label: 'Daily',  color: '#ffb86c' },
   ];
+
+  const streak = stats?.streak || 0;
+  const badge = getMilestoneBadge(streak);
 
   return (
     <div style={{
@@ -32,6 +42,8 @@ export default function StatsScreen({ onBack }) {
       background: C.bgGrad, fontFamily: ff, padding: '40px 20px',
     }}>
       <div style={{ width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
           <button onClick={onBack} style={{
             background: 'none', border: 'none', color: C.textDim, cursor: 'pointer',
@@ -45,16 +57,45 @@ export default function StatsScreen({ onBack }) {
           <div style={{ width: 60 }} />
         </div>
 
-        {/* Streak */}
+        {/* Streak card */}
         <div style={{
-          background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14,
-          padding: '20px 24px', textAlign: 'center',
+          background: C.surface, border: `1px solid ${badge ? badge.color + '60' : C.border}`,
+          borderRadius: 14, padding: '20px 24px', textAlign: 'center',
+          boxShadow: badge ? `0 0 0 1px ${badge.color}30` : 'none',
         }}>
-          <div style={{ fontSize: 36, fontWeight: 700, color: C.accent, fontFamily: mf }}>{stats?.streak || 0}</div>
+          <div style={{ fontSize: 36, fontWeight: 700, color: C.accent, fontFamily: mf }}>{streak}</div>
           <div style={{ fontSize: 13, color: C.textDim, fontWeight: 500, marginTop: 4 }}>Day Streak</div>
+
+          {badge && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              marginTop: 10, padding: '5px 14px', borderRadius: 20,
+              background: badge.color + '18', border: `1px solid ${badge.color}50`,
+            }}>
+              <span style={{ fontSize: 16 }}>{badge.emoji}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: badge.color, fontFamily: ff }}>{badge.label}</span>
+            </div>
+          )}
+
+          {/* Milestone progress hints */}
+          {!badge && streak > 0 && (
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 8, fontFamily: ff }}>
+              {7 - streak} more day{7 - streak !== 1 ? 's' : ''} to earn the 🔥 On Fire badge
+            </div>
+          )}
+          {badge?.min === 7 && streak < 30 && (
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 8, fontFamily: ff }}>
+              {30 - streak} more day{30 - streak !== 1 ? 's' : ''} to earn the 🥇 Dedicated badge
+            </div>
+          )}
+          {badge?.min === 30 && streak < 100 && (
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 8, fontFamily: ff }}>
+              {100 - streak} more day{100 - streak !== 1 ? 's' : ''} to earn the 🏆 Centurion badge
+            </div>
+          )}
         </div>
 
-        {/* Per-difficulty */}
+        {/* Per-difficulty cards */}
         {cats.map(({ key, label, color }) => {
           const played = getCount(key), best = getBest(key), avg = getAvg(key);
           return (
@@ -93,6 +134,7 @@ export default function StatsScreen({ onBack }) {
         }}>
           Reset all stats
         </button>
+
       </div>
     </div>
   );
