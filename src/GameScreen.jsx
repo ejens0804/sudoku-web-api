@@ -206,7 +206,7 @@ export default function GameScreen({ difficulty: initDiff, isDaily, onMenu }) {
     setCandidates(next ? computeAllCandidates(board) : Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => new Set())));
   };
 
-  useEffect(() => { if (autoNotes && board) setCandidates(computeAllCandidates(board)); }, [board, autoNotes]);
+  useEffect(() => { if (autoNotes && board) setCandidates(computeAllCandidates(board)); }, [autoNotes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyboard
   useEffect(() => {
